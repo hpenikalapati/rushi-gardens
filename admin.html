@@ -84,7 +84,7 @@
     <h2>Seller Login</h2>
     <p style="font-size: 0.9em; color: #4a5568;">Sign in to manage Rushi Gardens</p>
     <form id="loginForm">
-      <input type="email" id="adminEmail" placeholder="Email" required>
+      <input type="email" id="adminEmail" placeholder="Admin Email" required>
       <input type="password" id="adminPassword" placeholder="Password" required>
       <button type="submit" id="loginBtn">Sign In</button>
     </form>
@@ -270,4 +270,49 @@
     }
 
     // Update Price or In Stock status
-    async function update
+    async function updateProduct(id) {
+      const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
+      const inStock = document.getElementById(`stock-${id}`).checked;
+      try {
+        await db.collection('products').doc(id).update({ pricePerLb: price, inStock: inStock });
+        alert('Product updated successfully!');
+      } catch (err) {
+        console.error("Error updating product:", err);
+        alert('Failed to update product: ' + err.message);
+      }
+    }
+
+    // Delete item permanently from database
+    async function deleteProduct(id, productName) {
+      const confirmed = confirm(`Are you sure you want to permanently delete "${productName}" from your inventory?`);
+      if (confirmed) {
+        try {
+          await db.collection('products').doc(id).delete();
+          alert(`"${productName}" has been removed from inventory.`);
+        } catch (err) {
+          console.error("Error deleting product:", err);
+          alert('Failed to delete product: ' + err.message);
+        }
+      }
+    }
+
+    // Add a new product
+    async function addNewProduct() {
+      const name = document.getElementById('addName').value.trim();
+      const price = parseFloat(document.getElementById('addPrice').value) || 0;
+      if (name) {
+        try {
+          await db.collection('products').add({ name: name, pricePerLb: price, inStock: true });
+          document.getElementById('addName').value = '';
+          document.getElementById('addPrice').value = '';
+        } catch (err) {
+          console.error("Error adding product:", err);
+          alert('Failed to add product: ' + err.message);
+        }
+      } else {
+        alert('Please enter a product name.');
+      }
+    }
+  </script>
+</body>
+</html>
