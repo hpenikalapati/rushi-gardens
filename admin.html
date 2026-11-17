@@ -2,18 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rushi Gardens - Admin Dashboard</title>
-  <!-- BROWSER TAB ICON (FAVICON) -->
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="stylesheet" href="style.css">
   <style>
+    /* Login Screen Styling */
+    .login-box {
+      max-width: 360px;
+      margin: 4rem auto;
+      padding: 2rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      background: #f8fafc;
+      text-align: center;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .login-box button {
+      width: 100%;
+      margin-top: 10px;
+    }
+    .error-msg {
+      color: #e53e3e;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+
+    /* Dashboard Styling */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .logo-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header-logo {
+      height: 44px !important;
+      width: 44px !important;
+      object-fit: contain;
+    }
+    .btn-logout {
+      background-color: #718096;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-logout:hover { background-color: #4a5568; }
+
+    /* Tabs & Tables */
     .tab-btn { background: #e2e8f0; color: #2d3748; padding: 10px 20px; border: none; cursor: pointer; border-radius: 4px 4px 0 0; }
     .tab-btn.active { background: #2f855a; color: white; font-weight: bold; }
     .tab-content { display: none; margin-top: 20px; }
     .tab-content.active { display: block; }
     .order-card { border: 1px solid #cbd5e0; padding: 15px; margin-bottom: 15px; border-radius: 6px; background: #f8fafc; }
     
-    /* Action Buttons Styling */
+    /* Action Buttons */
     .btn-update { background-color: #2f855a; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
     .btn-update:hover { background-color: #276749; }
     .btn-delete { background-color: #e53e3e; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 6px; }
@@ -21,43 +77,67 @@
   </style>
 </head>
 <body>
-  <h1>Seller Dashboard</h1>
 
-  <div>
-    <button class="tab-btn active" onclick="switchTab('ordersTab', this)">📦 Order Summaries</button>
-    <button class="tab-btn" onclick="switchTab('inventoryTab', this)">🥦 Manage Inventory</button>
+  <!-- LOGIN SECTION (Visible when signed out) -->
+  <div id="loginSection" class="login-box">
+    <img src="logo.png" alt="Rushi Gardens Logo" style="height: 55px; width: auto; margin-bottom: 10px;">
+    <h2>Seller Login</h2>
+    <p style="font-size: 0.9em; color: #4a5568;">Sign in to manage Rushi Gardens</p>
+    <form id="loginForm">
+      <input type="email" id="adminEmail" placeholder="Admin Email" required>
+      <input type="password" id="adminPassword" placeholder="Password" required>
+      <button type="submit" id="loginBtn">Sign In</button>
+    </form>
+    <p id="loginError" class="error-msg"></p>
   </div>
 
-  <!-- ORDER SUMMARY SECTION -->
-  <div id="ordersTab" class="tab-content active">
-    <h2>Customer Order History</h2>
-    <div id="orderList">Loading order history...</div>
+  <!-- DASHBOARD SECTION (Hidden until authenticated) -->
+  <div id="dashboardSection" style="display: none;">
+    <div class="dashboard-header">
+      <div class="logo-header">
+        <img src="logo.png" alt="Rushi Gardens Logo" class="header-logo">
+        <h1 style="margin: 0;">Seller Dashboard</h1>
+      </div>
+      <button class="btn-logout" onclick="logoutAdmin()">Sign Out</button>
+    </div>
+
+    <div>
+      <button class="tab-btn active" onclick="switchTab('ordersTab', this)">📦 Order Summaries</button>
+      <button class="tab-btn" onclick="switchTab('inventoryTab', this)">🥦 Manage Inventory</button>
+    </div>
+
+    <!-- ORDER SUMMARY SECTION -->
+    <div id="ordersTab" class="tab-content active">
+      <h2>Customer Order History</h2>
+      <div id="orderList">Loading order history...</div>
+    </div>
+
+    <!-- INVENTORY MANAGEMENT SECTION -->
+    <div id="inventoryTab" class="tab-content">
+      <h2>Produce Catalog</h2>
+      <table border="1" cellpadding="8" style="width: 100%; text-align: left; border-collapse: collapse;">
+        <thead>
+          <tr style="background-color: #edf2f7;">
+            <th>Produce</th>
+            <th>Price ($)</th>
+            <th>In Stock?</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminInventory"></tbody>
+      </table>
+
+      <h3 style="margin-top: 2rem;">Add New Produce Item</h3>
+      <input type="text" id="addName" placeholder="Item Name (e.g. Guava)">
+      <input type="number" id="addPrice" step="0.01" placeholder="Price">
+      <button onclick="addNewProduct()" style="background-color: #2b6cb0;">Add Produce</button>
+    </div>
   </div>
 
-  <!-- INVENTORY MANAGEMENT SECTION -->
-  <div id="inventoryTab" class="tab-content">
-    <h2>Produce Catalog</h2>
-    <table border="1" cellpadding="8" style="width: 100%; text-align: left; border-collapse: collapse;">
-      <thead>
-        <tr style="background-color: #edf2f7;">
-          <th>Produce</th>
-          <th>Price ($)</th>
-          <th>In Stock?</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="adminInventory"></tbody>
-    </table>
-
-    <h3 style="margin-top: 2rem;">Add New Produce Item</h3>
-    <input type="text" id="addName" placeholder="Item Name (e.g. Guava)">
-    <input type="number" id="addPrice" step="0.01" placeholder="Price/lb">
-    <button onclick="addNewProduct()" style="background-color: #2b6cb0;">Add Produce</button>
-  </div>
-
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDKs (App, Firestore, and Auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -72,45 +152,54 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    
-  async function seedFirebaseInventory() {
-    const defaultProducts = [
-      { name: 'Green Okra', pricePerLb: 3.50, inStock: true },
-      { name: 'Red Okra', pricePerLb: 3.00, inStock: true },
-      { name: 'Eggplant', pricePerLb: 3.00, inStock: true },
-      { name: 'Gongura', pricePerLb: 7.00, inStock: true },
-      { name: 'Green Chilies', pricePerLb: 5.00, inStock: true },
-      { name: 'Indian Tomatoes', pricePerLb: 3.00, inStock: true },
-      { name: 'Cluster Beans', pricePerLb: 4.00, inStock: true },
-      { name: 'Ridge Gourd', pricePerLb: 2.00, inStock: true },
-      { name: 'Mangos', pricePerLb: 6.00, inStock: true },
-      { name: 'Suppota', pricePerLb: 6.00, inStock: true },
-      { name: 'Sugar Apple', pricePerLb: 15.00, inStock: true },
-      { name: 'Guavas', pricePerLb: 5.00, inStock: true },
-      { name: 'Lychees', pricePerLb: 11.00, inStock: false },
-      { name: 'Indian Karpuravalli Banana', pricePerLb: 1.25, inStock: false },
-      { name: 'Whole Jackfruit', pricePerLb: 1.00, inStock: true },
-      { name: 'Jackfruit Pieces', pricePerLb: 1.25, inStock: true },
-      { name: 'Tindora', pricePerLb: 4.00, inStock: true },
-      { name: 'Paan Leaves', pricePerLb: 0.20, inStock: true },
-      { name: 'Eggs', pricePerLb: 9.00, inStock: true }
-    ];
+    let unsubscribeOrders = null;
+    let unsubscribeProducts = null;
 
-  // 1. Delete existing items in Firestore
-    const snapshot = await db.collection('products').get();
-    const deletePromises = snapshot.docs.map(doc => doc.ref.delete());
-    await Promise.all(deletePromises);
+    // Monitor Authentication State
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        // User is signed in: Show dashboard and start database listeners
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('dashboardSection').style.display = 'block';
+        startDashboardListeners();
+      } else {
+        // User is signed out: Show login screen and stop database listeners
+        document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('dashboardSection').style.display = 'none';
+        if (unsubscribeOrders) unsubscribeOrders();
+        if (unsubscribeProducts) unsubscribeProducts();
+      }
+    });
 
-  // 2. Upload new default products
-    const addPromises = defaultProducts.map(p => db.collection('products').add(p));
-    await Promise.all(addPromises);
+    // Handle Login Form Submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+      const errorEl = document.getElementById('loginError');
+      const loginBtn = document.getElementById('loginBtn');
 
-    alert('Firebase inventory successfully updated with new produce list!');
-}
+      errorEl.innerText = '';
+      loginBtn.disabled = true;
+      loginBtn.innerText = 'Signing in...';
 
-// Uncomment the line below, refresh admin.html once, then re-comment it!
-// seedFirebaseInventory();
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (err) {
+        errorEl.innerText = 'Invalid email or password. Please try again.';
+        console.error('Login error:', err);
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerText = 'Sign In';
+      }
+    });
+
+    // Handle Sign Out
+    function logoutAdmin() {
+      auth.signOut();
+    }
 
     function switchTab(tabId, btn) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -119,102 +208,66 @@
       btn.classList.add('active');
     }
 
-    // 1. Load Live Orders Summary
-    db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-      const list = document.getElementById('orderList');
-      list.innerHTML = '';
-      if (snapshot.empty) {
-        list.innerHTML = '<p>No orders placed yet.</p>';
-        return;
-      }
+    // Start Firestore Listeners ONLY After Admin Authenticates
+    function startDashboardListeners() {
+      // 1. Load Live Orders Summary
+      unsubscribeOrders = db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+        const list = document.getElementById('orderList');
+        list.innerHTML = '';
+        if (snapshot.empty) {
+          list.innerHTML = '<p>No orders placed yet.</p>';
+          return;
+        }
 
-      snapshot.forEach(doc => {
-        const o = doc.data();
-        const date = o.timestamp ? new Date(o.timestamp.toDate()).toLocaleString() : 'Just now';
-        
-        let itemDetailsHtml = '<ul>';
-        o.items.forEach(i => {
-          itemDetailsHtml += `<li>${i.name}: <strong>${i.lbs} lbs</strong> ($${i.subtotal.toFixed(2)})</li>`;
+        snapshot.forEach(doc => {
+          const o = doc.data();
+          const date = o.timestamp ? new Date(o.timestamp.toDate()).toLocaleString() : 'Just now';
+          
+          let itemDetailsHtml = '<ul>';
+          o.items.forEach(i => {
+            // Supports both older (lbs) and newer (qty + unit) order structures
+            const quantityText = i.qty ? `${i.qty} ${i.unit}` : `${i.lbs} lbs`;
+            itemDetailsHtml += `<li>${i.name}: <strong>${quantityText}</strong> ($${i.subtotal.toFixed(2)})</li>`;
+          });
+          itemDetailsHtml += '</ul>';
+
+          const card = document.createElement('div');
+          card.className = 'order-card';
+          card.innerHTML = `
+            <h3>Order #${doc.id.substring(0, 6)} — <span style="color:#2f855a;">$${o.totalAmount.toFixed(2)}</span></h3>
+            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Customer:</strong> ${o.customerName} | <strong>Phone:</strong> ${o.customerPhone} | <strong>Email:</strong> ${o.customerEmail}</p>
+            <h4>Items Ordered:</h4>
+            ${itemDetailsHtml}
+          `;
+          list.appendChild(card);
         });
-        itemDetailsHtml += '</ul>';
-
-        const card = document.createElement('div');
-        card.className = 'order-card';
-        card.innerHTML = `
-          <h3>Order #${doc.id.substring(0, 6)} — <span style="color:#2f855a;">$${o.totalAmount.toFixed(2)}</span></h3>
-          <p><strong>Date:</strong> ${date}</p>
-          <p><strong>Customer:</strong> ${o.customerName} | <strong>Phone:</strong> ${o.customerPhone} | <strong>Email:</strong> ${o.customerEmail}</p>
-          <h4>Items Ordered:</h4>
-          ${itemDetailsHtml}
-        `;
-        list.appendChild(card);
+      }, err => {
+        document.getElementById('orderList').innerHTML = `<p style="color:red;">Access denied: ${err.message}</p>`;
       });
-    });
 
-    // 2. Load Live Inventory Management
-    db.collection('products').orderBy('name', 'asc').onSnapshot(snapshot => {
-      const tbody = document.getElementById('adminInventory');
-      tbody.innerHTML = '';
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${p.name}</strong></td>
-          <td><input type="number" step="0.01" value="${p.pricePerLb}" id="price-${doc.id}" style="width: 80px;"></td>
-          <td><input type="checkbox" ${p.inStock ? 'checked' : ''} id="stock-${doc.id}"></td>
-          <td>
-            <button class="btn-update" onclick="updateProduct('${doc.id}')">Update</button>
-            <button class="btn-delete" onclick="deleteProduct('${doc.id}', '${p.name.replace(/'/g, "\\'")}')">Delete</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+      // 2. Load Live Inventory Management
+      unsubscribeProducts = db.collection('products').orderBy('name', 'asc').onSnapshot(snapshot => {
+        const tbody = document.getElementById('adminInventory');
+        tbody.innerHTML = '';
+        snapshot.forEach(doc => {
+          const p = doc.data();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${p.name}</strong></td>
+            <td><input type="number" step="0.01" value="${p.pricePerLb}" id="price-${doc.id}" style="width: 80px;"></td>
+            <td><input type="checkbox" ${p.inStock ? 'checked' : ''} id="stock-${doc.id}"></td>
+            <td>
+              <button class="btn-update" onclick="updateProduct('${doc.id}')">Update</button>
+              <button class="btn-delete" onclick="deleteProduct('${doc.id}', '${p.name.replace(/'/g, "\\'")}')">Delete</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }, err => {
+        console.error("Products read error:", err);
       });
-    });
+    }
 
     // Update Price or In Stock status
-    async function updateProduct(id) {
-      const price = parseFloat(document.getElementById(`price-${id}`).value) || 0;
-      const inStock = document.getElementById(`stock-${id}`).checked;
-      try {
-        await db.collection('products').doc(id).update({ pricePerLb: price, inStock: inStock });
-        alert('Product updated successfully!');
-      } catch (err) {
-        console.error("Error updating product:", err);
-        alert('Failed to update product.');
-      }
-    }
-
-    // Delete item permanently from database
-    async function deleteProduct(id, productName) {
-      const confirmed = confirm(`Are you sure you want to permanently delete "${productName}" from your inventory?`);
-      if (confirmed) {
-        try {
-          await db.collection('products').doc(id).delete();
-          alert(`"${productName}" has been removed from inventory.`);
-        } catch (err) {
-          console.error("Error deleting product:", err);
-          alert('Failed to delete product.');
-        }
-      }
-    }
-
-    // Add a new product
-    async function addNewProduct() {
-      const name = document.getElementById('addName').value.trim();
-      const price = parseFloat(document.getElementById('addPrice').value) || 0;
-      if (name) {
-        try {
-          await db.collection('products').add({ name: name, pricePerLb: price, inStock: true });
-          document.getElementById('addName').value = '';
-          document.getElementById('addPrice').value = '';
-        } catch (err) {
-          console.error("Error adding product:", err);
-          alert('Failed to add product.');
-        }
-      } else {
-        alert('Please enter a product name.');
-      }
-    }
-  </script>
-</body>
-</html>
+    async function update
