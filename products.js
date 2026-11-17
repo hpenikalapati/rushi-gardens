@@ -8,7 +8,7 @@ const defaultProducts = [
   { id: 'cluster-beans', name: 'Cluster Beans', pricePerLb: 4.00, inStock: true },
   { id: 'ridge-gourd', name: 'Ridge Gourd', pricePerLb: 2.00, inStock: true },
   { id: 'mango', name: 'Mangos', pricePerLb: 6.00, inStock: true },
-  { id: 'suppota', name: 'Suppota', pricePerLb: 6.00, inStock: true },
+  { id: 'sapota', name: 'Sapota', pricePerLb: 6.00, inStock: true },
   { id: 'sugar-apple', name: 'Sugar Apple', pricePerLb: 15, inStock: true },
   { id: 'guava', name: 'Guavas', pricePerLb: 5.00, inStock: true },
   { id: 'lychee', name: 'Lychees', pricePerLb: 11.00, inStock: false },
