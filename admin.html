@@ -87,17 +87,17 @@
     <form id="loginForm">
       <input type="email" id="adminEmail" placeholder="Admin Email" required>
       <input type="password" id="adminPassword" placeholder="Password" required>
-      <button type="submit" id="loginBtn">Sign In</button>
+      <button type="submit" id="loginBtn" class="btn-primary">Sign In</button>
     </form>
 
     <p style="margin-top: 15px; font-size: 0.9em;">
-      <a href="#" id="toggleAuthMode" style="color: #2f855a; text-decoration: underline;">Who are you?</a>
+      <a href="#" id="toggleAuthMode" style="color: #2f855a; text-decoration: underline;">Who are you? Make an account here.</a>
     </p>
     <p id="loginError" class="error-msg"></p>
   </div>
 
   <!-- DASHBOARD SECTION (Hidden until authenticated) -->
-  <div id="dashboardSection" style="display: none;">
+  <div id="dashboardSection" style="display: none; max-width: 1050px; margin: 2rem auto; padding: 0 1.5rem;">
     <div class="dashboard-header">
       <div class="logo-header">
         <img src="logo.png" alt="Rushi Gardens Logo" class="header-logo">
@@ -107,8 +107,8 @@
     </div>
 
     <div>
-      <button class="tab-btn active" onclick="switchTab('ordersTab', this)">📦 Order Summaries</button>
-      <button class="tab-btn" onclick="switchTab('inventoryTab', this)">🥦 Manage Inventory</button>
+      <button class="tab-btn active" onclick="switchTab('ordersTab', this)">Order Summaries</button>
+      <button class="tab-btn" onclick="switchTab('inventoryTab', this)">Manage Inventory</button>
     </div>
 
     <!-- ORDER SUMMARY SECTION -->
@@ -189,7 +189,7 @@
         document.getElementById('authTitle').innerText = 'Seller Login';
         document.getElementById('authSubtitle').innerText = 'Sign in to manage Rushi Gardens';
         document.getElementById('loginBtn').innerText = 'Sign In';
-        document.getElementById('toggleAuthMode').innerText = 'First time here? Create an admin account';
+        document.getElementById('toggleAuthMode').innerText = 'Who are you? Make an account here.';
       }
     });
 
@@ -318,6 +318,7 @@
       }, err => {
         console.error("Products read error:", err);
       });
+    } // <-- Missing closing brace was here
 
     // Update Price, Image, or In Stock status
     async function updateProduct(id) {
@@ -334,6 +335,20 @@
       } catch (err) {
         console.error("Error updating product:", err);
         alert('Failed to update product: ' + err.message);
+      }
+    }
+
+    // Delete item permanently from database
+    async function deleteProduct(id, productName) {
+      const confirmed = confirm(`Are you sure you want to permanently delete "${productName}" from your inventory?`);
+      if (confirmed) {
+        try {
+          await db.collection('products').doc(id).delete();
+          alert(`"${productName}" has been removed from inventory.`);
+        } catch (err) {
+          console.error("Error deleting product:", err);
+          alert('Failed to delete product: ' + err.message);
+        }
       }
     }
 
